@@ -1,0 +1,157 @@
+<!doctype html>
+<html>
+<head>
+	<link type="text/css" rel="stylesheet" href="main.css"/>
+</head>
+
+<body>
+
+<div id="mainPanel"class="panel">
+	<div id="canvasContainer">
+		
+	</div>
+
+	<div id="legend">
+		<font color=#FF0000> Positive x-axis </font>
+		<font color=#440000> Negative x-axis </font><br/>
+		<font color=#00FF00> Positive y-axis </font>
+		<font color=#004400> Negative y-axis </font><br/>
+		<font color=#0000FF> Positive z-axis </font>
+		<font color=#000044> Negative z-axis </font><br/>
+		<hr/>
+
+		<div id="positions">
+			<div id="playerPosition">
+				Player: x:  y:  z:
+			</div><br/>
+			<div id="cameraPosition">
+				Camera: x:  y:  z:
+			</div><br/>
+			<div id="cameraAngle">
+				Theta: Phi:
+			</div><br/>
+			<hr/>
+		</div>
+
+		<div id="controls">
+			A: Orbit along y axis<br/>
+			D: Orbit along y axis<br/>
+			Left: Rotate player<br/>
+			Right: Rotate player<br/>
+			Up: Decrease player's z by 5<br/>
+			Down: Increase player's z by 5<br/>
+			Space: Increase player's y by 10<br/>
+			W: Orbit perpendicular to xz plane<br/>
+			S: Orbit perpendicular to xz plane<br/>
+		</div>
+		<hr/>
+		<div id="frameCounter">
+			FPS: 
+		</div>
+	</div>
+</div>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+	<script src="cameraFunctions.js"></script>
+	<script src="keyboardFunctions.js"></script>
+	<script src="globalVariables.js"></script>
+	<script src="setupScene.js"></script>
+	<script src="playerFunctions.js"></script>
+	
+	<script>
+
+//expects points to be a map {x, y, z}
+//returns the Cartesian distance between two points
+function distance(pointA, pointB){
+	return Math.sqrt(Math.pow(pointA.x - pointB.x, 2) + Math.pow(pointA.y - pointB.y, 2) + Math.pow(pointA.z - pointB.z, 2));
+}
+
+
+//taken from github
+var rotWorldMatrix;      
+function rotateAroundWorldAxis( object, axis, radians ) {
+    rotWorldMatrix = new THREE.Matrix4();
+    rotWorldMatrix.makeRotationAxis(axis.normalize(), radians);
+    rotWorldMatrix.multiply(object.matrix);        // pre-multiply
+    object.matrix = rotWorldMatrix;
+    object.rotation.setFromRotationMatrix(object.matrix, object.order);
+} 
+
+
+
+
+
+function setup(){
+
+//the div element with id 'canvasContainer', in which graphics will be displayed
+//requires JQuery to be loaded
+	var $container = $('#canvasContainer');
+		
+	renderer = new THREE.WebGLRenderer({antialias:true});
+	//renderer = new THREE.CanvasRenderer({antialias:true});
+	renderer.setSize(GAME_WIDTH, GAME_HEIGHT);	
+	$container.append(renderer.domElement);
+	initiateScene();
+
+camera.lookAt(player.mesh.position);
+
+//intended to draw coordinate axes for debugging
+//expects startPoint and endPoint to be THREE.Vector3
+//expects color to be a hex value
+function drawAxis(startPoint, endPoint, color)
+{
+	var axisGeometry = new THREE.Geometry();
+	axisGeometry.vertices.push(startPoint);	
+	axisGeometry.vertices.push(endPoint);
+	var axis = new THREE.Line(axisGeometry, new THREE.LineBasicMaterial({color: color}));
+	scene.add(axis);
+//end of function drawAxis
+}
+
+
+//draws all 3 coordinate axes in both directions
+drawAxis(new THREE.Vector3(0,0,0), new THREE.Vector3(1000,0,0), 0xFF0000);
+drawAxis(new THREE.Vector3(0,0,0), new THREE.Vector3(-1000,0,0), 0x440000);
+drawAxis(new THREE.Vector3(0,0,0), new THREE.Vector3(0,1000,0), 0x00FF00);
+drawAxis(new THREE.Vector3(0,0,0), new THREE.Vector3(0,-1000,0), 0x004400);
+drawAxis(new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,1000), 0x0000FF);
+drawAxis(new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,-1000), 0x000044);
+
+//end of axes code
+
+	draw();
+//end of function setup()
+}
+
+function draw()
+{
+	handleKeyboardInput();
+//draws the scene from the camera's perspective
+	renderer.render(scene, camera);
+
+//update the indicators (info displayed to the right of the canvas)
+$('#playerPosition').text("Player: x: " + player.mesh.position.x.toFixed(3) + " y: " + player.mesh.position.y.toFixed(3) + " z: " + player.mesh.position.z.toFixed(3));
+$('#cameraPosition').text("Camera: x: " + camera.position.x.toFixed(3) + " y: " + camera.position.y.toFixed(3) + " z: " + camera.position.z.toFixed(3));
+
+//collect frame data
+if(frame_count == 0)
+	frame_count_start_time = new Date().getTime();
+if(frame_count == 59)
+//outputs frames per second sampled every second 
+	$('#frameCounter').text("FPS: " + (1000*60/(new Date().getTime() - frame_count_start_time)).toFixed(0) );
+frame_count = (frame_count + 1)%60;
+
+	
+//loop (Note that the loop is not dependent on time. It loops whenever the browser is ready.)
+	requestAnimationFrame(draw);
+//end of function draw()
+}
+
+startKeyListeners();
+setup();
+	</script>
+
+</body>
+</html>

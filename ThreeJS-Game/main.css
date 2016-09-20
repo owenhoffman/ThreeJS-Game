@@ -1,0 +1,24 @@
+*{
+	text-align: center;
+}
+
+.panel{
+	background-color: #BBB;
+}
+
+#mainPanel{
+	width: 700px;
+	height: 400px;
+	border: 3px solid black;
+}
+
+#canvasContainer{
+	float: left;
+}
+
+#legend{
+	float: right;
+	width: 298px;
+	height: 400px;
+	border: 1px solid black;
+}

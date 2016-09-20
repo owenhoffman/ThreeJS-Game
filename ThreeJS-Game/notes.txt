@@ -1,0 +1,5 @@
+v7
+Changed the way that the front face of the player is colored so that it is affected by shading now
+Created a Player class to help organize functions related to the player
+Created a Camera class to help organize functions related to the camera
+Condensed code in setupScene.js
